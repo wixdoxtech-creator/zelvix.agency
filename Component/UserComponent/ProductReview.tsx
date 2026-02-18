@@ -10,45 +10,30 @@ import {
 } from "@/components/ui/carousel";
 import { BadgeCheck, Quote, Sparkles, Star } from "lucide-react";
 
-const reviews = [
-  {
-    name: "Amit Pal",
-    role: "Verified Customer",
-    comment:
-      "The detox and immunity products feel very clean and easy to include in my routine. I noticed better energy in just a few weeks.",
-    rating: 5,
-  },
-  {
-    name: "Neha Sharma",
-    role: "Returning Customer",
-    comment:
-      "Packaging is great and the herbal quality feels premium. The stress support blend helped me sleep more consistently.",
-    rating: 5,
-  },
-  {
-    name: "Rahul Verma",
-    role: "Verified Customer",
-    comment:
-      "I started with one product and now use three daily. Good results and quick support from the team whenever I had questions.",
-    rating: 4,
-  },
-  {
-    name: "Priya Nair",
-    role: "Happy User",
-    comment:
-      "Loved the natural ingredient approach. The products are gentle, and I can feel the difference without side effects.",
-    rating: 5,
-  },
-  {
-    name: "Karan Mehta",
-    role: "Verified Customer",
-    comment:
-      "Great value and authentic experience. I appreciate that the formulas are simple and clearly explained.",
-    rating: 4,
-  },
-];
+type ReviewItem = {
+  name: string;
+  role?: string;
+  comment: string;
+  rating: number;
+  image?: string;
+};
 
-const ProductReview = () => {
+const ProductReview = ({ reviews }: { reviews: ReviewItem[] }) => {
+  if (!reviews || reviews.length === 0) {
+    return (
+      <section className="w-full py-14 md:py-20">
+        <div className="mx-auto w-full max-w-7xl rounded-3xl p-6 text-center md:p-10">
+          <h2 className="text-2xl font-bold text-[#1F2F46] md:text-3xl">
+            Customer Reviews
+          </h2>
+          <p className="mt-3 text-sm text-[#2F4A68] md:text-base">
+            No reviews available for this product yet.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   const averageRating = (
     reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
   ).toFixed(1);
@@ -99,7 +84,7 @@ const ProductReview = () => {
                               {review.name}
                             </p>
                             <p className="text-xs text-[#5C8DB8]">
-                              {review.role}
+                              {review.role ?? "Verified Customer"}
                             </p>
                           </div>
                         </div>

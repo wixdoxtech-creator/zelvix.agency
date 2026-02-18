@@ -6,6 +6,9 @@ import {
   Sparkles,
   Star,
 } from "lucide-react";
+import Category from "@/model/categories";
+import ProductModel from "@/model/product";
+import ProductDetaile from "@/model/productdetaile";
 import { Product } from "@/type";
 
 type CategoryPageProps = {
@@ -455,11 +458,96 @@ const formatINR = (value: number) =>
     maximumFractionDigits: 0,
   }).format(value);
 
+const toNumber = (value: string | number | null | undefined) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const parseDetailRows = (value: unknown) => {
+  if (Array.isArray(value)) {
+    return value as Array<Record<string, unknown>>;
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed)
+        ? (parsed as Array<Record<string, unknown>>)
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+};
+
+const parseImages = (value: unknown) => {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item ?? "").trim())
+      .filter((item) => item.length > 0);
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item) => String(item ?? "").trim())
+          .filter((item) => item.length > 0);
+      }
+    } catch {
+      const text = value.trim();
+      return text ? [text] : [];
+    }
+  }
+
+  return [];
+};
+
+const createFallbackCategory = (name: string): CategoryContent => ({
+  title: name,
+  description:
+    "Explore Ayurvedic products and guidance aligned with this health category.",
+  heroNote:
+    "Build better outcomes with consistent product use, lifestyle rhythm, and daily wellness discipline.",
+  productSlugs: [],
+  keyBenefits: [
+    "Category-focused product support",
+    "Daily routine alignment",
+    "Long-term wellness consistency",
+  ],
+  lifestyleTips: [
+    "Keep meals and sleep schedule regular",
+    "Stay active and hydrated every day",
+    "Track improvements week by week",
+  ],
+  whoItsFor: [
+    "Adults seeking category-specific wellness support",
+    "Users building sustainable health habits",
+  ],
+  faqs: [
+    {
+      question: "How long should I continue products in this category?",
+      answer:
+        "A consistent 8-12 week routine is commonly used to evaluate visible progress.",
+    },
+  ],
+});
+
 export default async function HealthCategoryDetailsPage({
   params,
 }: CategoryPageProps) {
   const { id } = await params;
-  const category = categoryMap[id];
+  const dbCategory = await Category.findOne({
+    where: { slug: id, status: "active" },
+  });
+  const category =
+    categoryMap[id] ??
+    (dbCategory
+      ? createFallbackCategory(String(dbCategory.get("name") ?? "Category"))
+      : undefined);
 
   if (!category) {
     return (
@@ -482,9 +570,85 @@ export default async function HealthCategoryDetailsPage({
     );
   }
 
-  const filteredProducts = products.filter((item) =>
+  const fallbackProducts = products.filter((item) =>
     category.productSlugs.includes(item.slug),
   );
+  let filteredProducts: Product[] = [];
+
+  if (dbCategory) {
+    const categoryId = Number(dbCategory.get("id"));
+    const dbProducts = await ProductModel.findAll({
+      where: { category_id: categoryId, status: "active" },
+      order: [["createdAt", "DESC"]],
+    });
+
+    const mappedProducts = await Promise.all(
+      dbProducts.map(async (row) => {
+        const product = row.toJSON() as Record<string, unknown>;
+        const productId = Number(product.id);
+        const detailsRow = await ProductDetaile.findOne({
+          where: { product_id: productId },
+        });
+        const details =
+          (detailsRow?.toJSON() as Record<string, unknown> | undefined) ??
+          undefined;
+
+        const fallback = fallbackProducts.find(
+          (item) => item.slug === String(product.slug ?? ""),
+        );
+        const benefitRows = parseDetailRows(details?.benefits);
+        const ingredientRows = parseDetailRows(details?.Ingredients);
+        const aboutPoints = benefitRows
+          .map((item) => String(item.heding ?? item.pera ?? "").trim())
+          .filter((item) => item.length > 0)
+          .slice(0, 4);
+        const productImages = parseImages(product.images);
+
+        return {
+          slug: String(product.slug ?? ""),
+          title: String(product.name ?? fallback?.title ?? "Product"),
+          category: category.title,
+          orgPrice: toNumber(
+            (product.prise as string | number | undefined) ??
+              fallback?.orgPrice,
+          ),
+          disPrice: toNumber(
+            (product.offer_prise as string | number | undefined) ??
+              (product.prise as string | number | undefined) ??
+              fallback?.disPrice,
+          ),
+          rating: fallback?.rating ?? 4,
+          description:
+            String(product.description ?? "").trim() ||
+            fallback?.description ||
+            "",
+          images:
+            productImages.length > 0
+              ? productImages
+              : (fallback?.images ?? ["/homeImage2.webp"]),
+          aboutPoints:
+            aboutPoints.length > 0
+              ? aboutPoints
+              : (fallback?.aboutPoints ?? []),
+          ingredients:
+            ingredientRows.length > 0
+              ? ingredientRows.slice(0, 4).map((item, index) => ({
+                  id: index + 1,
+                  image: String(item.img ?? "/homeImage2.webp"),
+                  name: String(item.heding ?? `Ingredient ${index + 1}`),
+                  text: String(item.pera ?? ""),
+                }))
+              : (fallback?.ingredients ?? []),
+        } as Product;
+      }),
+    );
+
+    filteredProducts = mappedProducts.filter((item) => item.slug.length > 0);
+  }
+
+  if (filteredProducts.length === 0) {
+    filteredProducts = fallbackProducts;
+  }
 
   return (
     <main className="w-full bg-[#faf8f5] py-10 md:py-14">
@@ -496,42 +660,6 @@ export default async function HealthCategoryDetailsPage({
           <h1 className="mt-2 text-3xl font-bold text-[#1F2F46] md:text-5xl">
             {category.title}
           </h1>
-          <p className="mt-3 max-w-3xl text-sm text-[#2F4A68] md:text-base">
-            {category.description}
-          </p>
-          <p className="mt-4 max-w-4xl rounded-2xl border border-[#CFE4F2] bg-white/75 p-4 text-sm leading-6 text-[#24425D]">
-            {category.heroNote}
-          </p>
-
-          <div className="mt-6 grid gap-3 text-sm sm:grid-cols-3">
-            <div className="rounded-xl border border-[#CFE4F2] bg-white/80 p-3 text-[#1F2F46]">
-              <div className="flex items-center gap-2 font-semibold">
-                <ShieldCheck className="h-4 w-4 text-[#4A63A3]" />
-                Product Matches
-              </div>
-              <p className="mt-1 text-[#2F4A68]">
-                {filteredProducts.length} curated options
-              </p>
-            </div>
-            <div className="rounded-xl border border-[#CFE4F2] bg-white/80 p-3 text-[#1F2F46]">
-              <div className="flex items-center gap-2 font-semibold">
-                <Sparkles className="h-4 w-4 text-[#4A63A3]" />
-                Core Benefits
-              </div>
-              <p className="mt-1 text-[#2F4A68]">
-                {category.keyBenefits.length} focus areas
-              </p>
-            </div>
-            <div className="rounded-xl border border-[#CFE4F2] bg-white/80 p-3 text-[#1F2F46]">
-              <div className="flex items-center gap-2 font-semibold">
-                <ArrowRight className="h-4 w-4 text-[#4A63A3]" />
-                Routine Guidance
-              </div>
-              <p className="mt-1 text-[#2F4A68]">
-                Practical daily lifestyle support
-              </p>
-            </div>
-          </div>
         </div>
 
         <div className="mt-10">

@@ -1,7 +1,9 @@
 "use client";
 
+import { Bookmark } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import AddToCart from "@/Component/UserComponent/AddToCart";
 
 const navItems = [
   { name: "Health Categories", url: "health-categories" },
@@ -12,13 +14,10 @@ const navItems = [
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [role, setRole] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedRole = localStorage.getItem("role");
-    setRole(storedRole);
-  }, []);
-
+  const [role] = useState<string | null>(() =>
+    typeof window !== "undefined" ? localStorage.getItem("role") : null,
+  );
+  const [openCart, setOpenCart] = useState(false);
 
   return (
     <header className="fixed left-0 right-0 top-0 z-50  bg-[#faf8f5]/95 backdrop-blur">
@@ -41,8 +40,13 @@ const NavBar = () => {
               {item.name}
             </Link>
           ))}
+        </div>
 
-          {role === "admin" && (
+        <div className="hidden items-center gap-3 md:flex">
+          {role === "admin" ||
+          role === "inventory_manager" ||
+          role === "sales" ||
+          role === "warehouse" ? (
             <Link
               key={`/admin/dashboard`}
               href={`/admin/dashboard`}
@@ -50,11 +54,17 @@ const NavBar = () => {
             >
               Admin
             </Link>
+          ) : role === "user" ? (
+            <button type="button" onClick={() => setOpenCart(true)}>
+              <Bookmark className="text-sm font-medium text-[#2F4A68] transition-colors hover:text-[#1F2F46]" />
+            </button>
+          ) : (
+            <button className="rounded-full border border-[#2F4A68] bg-linear-to-b from-[#5C8DB8] to-[#1F2F46] px-4 py-2 text-sm font-semibold text-[#FFF1EB] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_8px_16px_rgba(31,47,70,0.2)] transition hover:from-[#4B7FA8] hover:to-[#1F2F46]">
+              Login
+            </button>
           )}
-        </div>
 
-        <div className="hidden items-center gap-3 md:flex">
-          <Link
+          {/* <Link
             href="tel:+10000000000"
             className="rounded-full border border-[#2F4A68] bg-linear-to-b from-[#5C8DB8] to-[#1F2F46] px-4 py-2 text-sm font-semibold text-[#FFF1EB] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_8px_16px_rgba(31,47,70,0.2)] transition hover:from-[#4B7FA8] hover:to-[#1F2F46]"
           >
@@ -67,7 +77,7 @@ const NavBar = () => {
             className="rounded-full border border-[#5C8DB8]/70 bg-[#FFF1EB]/75 px-4 py-2 text-sm font-semibold text-[#1F2F46] shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(47,74,104,0.12)] backdrop-blur-sm transition hover:bg-[#FFF1EB]"
           >
             WhatsApp
-          </Link>
+          </Link> */}
         </div>
 
         <button
@@ -111,6 +121,8 @@ const NavBar = () => {
           </div>
         </div>
       ) : null}
+
+      <AddToCart isOpen={openCart} onPress={setOpenCart} />
     </header>
   );
 };

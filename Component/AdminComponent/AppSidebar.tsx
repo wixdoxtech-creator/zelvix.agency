@@ -99,6 +99,10 @@ const menuItems: MenuItem[] = [
         title: "Block Customer List",
         url: "/admin/user/block-user-List",
       },
+      {
+        title: "User Role",
+        url: "/admin/user/user-role",
+      },
     ],
   },
   {
@@ -125,6 +129,14 @@ const menuItems: MenuItem[] = [
             title: "Product Detaile",
             url: "/admin/products/manage-product/product-detaile",
           },
+          {
+            title: "Product Review",
+            url: "/admin/products/manage-product/product-review",
+          },
+          {
+            title: "Product Faq",
+            url: "/admin/products/manage-product/product-faq",
+          },
         ],
       },
       {
@@ -147,6 +159,32 @@ const menuItems: MenuItem[] = [
           {
             title: "Payment Method",
             url: "/admin/payment-method",
+          },
+        ],
+      },
+      {
+        title: "Locations",
+        children: [
+          {
+            title: "Country",
+            url: "/admin/locations/country",
+          },
+          {
+            title: "State",
+            url: "/admin/locations/state",
+          },
+          {
+            title: "City",
+            url: "/admin/locations/city",
+          },
+
+          {
+            title: "Pincode",
+            url: "/admin/locations/pincode",
+          },
+          {
+            title: "Shipping Rule",
+            url: "/admin/locations/shipping",
           },
         ],
       },
@@ -185,6 +223,11 @@ const menuItems: MenuItem[] = [
         ],
       },
     ],
+  },
+  {
+    title: "Payment",
+    url: "/admin/payment",
+    icon: LayoutDashboard,
   },
 ];
 

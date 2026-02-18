@@ -7,6 +7,16 @@ import "../model/categories.ts";
 import "../model/product.ts";
 import "../model/coupon.ts";
 import "../model/productdetaile.ts";
+import "../model/city.ts";
+import "../model/country.ts";
+import "../model/state.ts";
+import "../model/pincode.ts";
+import "../model/shipping.ts";
+import "../model/faq.ts";
+import "../model/review.ts";
+import "../model/address.ts";
+import "../model/paymentgatwy.ts";
+
 
 async function dbSync() {
   try {

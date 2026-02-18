@@ -23,11 +23,6 @@ const Category = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-    status: {
-      type: DataTypes.ENUM("active", "inactive"),
-      allowNull: false,
-      defaultValue: "active",
-    },
   },
   {
     tableName: "categories",

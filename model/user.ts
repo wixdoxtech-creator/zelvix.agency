@@ -20,9 +20,23 @@ const User = sequelize.define(
       allowNull: false,
     },
     role: {
-      type: DataTypes.ENUM("admin", "user"),
+      type: DataTypes.ENUM("admin", "user", "inventory_manager", "sales", "warehouse"),
       allowNull: false,
       defaultValue: "user",
+    },
+    is_verified: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    otp: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    is_block: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
     status: {
       type: DataTypes.ENUM("block", "not_block"),

@@ -5,6 +5,12 @@ export type Ingredient = {
   text: string;
 };
 
+export type BenefitItem = {
+  heding: string;
+  img: string;
+  pera: string;
+};
+
 export type ProductDetail = {
   slug: string;
   title: string;
@@ -15,6 +21,7 @@ export type ProductDetail = {
   rating: number;
   images: string[];
   aboutPoints: string[];
+  benefits?: BenefitItem[];
   ingredients: { id: number; image: string; name: string; text: string }[];
   ayurvedicSteps: {
     number: string;

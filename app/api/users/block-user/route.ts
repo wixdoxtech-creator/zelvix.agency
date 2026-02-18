@@ -1,4 +1,5 @@
 import User from "@/model/user";
+import { Op } from "sequelize";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -18,9 +19,18 @@ export async function GET(request: Request) {
     const { count, rows } = await User.findAndCountAll({
       where: {
         role: "user",
-        status: "block",
+        [Op.or]: [{ status: "block" }, { is_block: true }],
       },
-      attributes: ["id", "email", "role", "status", "createdAt", "updatedAt"],
+      attributes: [
+        "id",
+        "email",
+        "role",
+        "status",
+        "is_block",
+        "is_verified",
+        "createdAt",
+        "updatedAt",
+      ],
       order: [["createdAt", "DESC"]],
       limit,
       offset,
@@ -83,6 +93,7 @@ export async function PATCH(request: Request) {
     }
 
     user.set("status", status);
+    user.set("is_block", status === "block");
     await user.save();
 
     return NextResponse.json(
@@ -92,6 +103,7 @@ export async function PATCH(request: Request) {
           id: user.get("id"),
           email: user.get("email"),
           status: user.get("status"),
+          is_block: user.get("is_block"),
         },
       },
       { status: 200 },

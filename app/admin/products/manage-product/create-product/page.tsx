@@ -49,6 +49,7 @@ type QtyOfferInput = {
   qty: string;
   price: string;
   label: string;
+  label2: string;
 };
 
 type Pagination = {
@@ -141,6 +142,7 @@ const toQtyOffers = (value: unknown): QtyOfferInput[] => {
         qty: String(raw.qty ?? ""),
         price: String(raw.price ?? ""),
         label: String(raw.label ?? "").trim(),
+        label2: String(raw.label2 ?? "").trim(),
       };
     })
     .filter((item): item is QtyOfferInput => item !== null);
@@ -313,7 +315,10 @@ const Page = () => {
   };
 
   const addQtyOfferRow = () => {
-    setQtyOffers((prev) => [...prev, { qty: "", price: "", label: "" }]);
+    setQtyOffers((prev) => [
+      ...prev,
+      { qty: "", price: "", label: "", label2: "" },
+    ]);
   };
 
   const updateQtyOfferRow = (
@@ -345,13 +350,15 @@ const Page = () => {
         qty: number;
         price: number;
         label: string;
+        label2: string;
       }> = [];
 
       for (const offer of qtyOffers) {
         const qtyText = offer.qty.trim();
         const priceText = offer.price.trim();
         const label = offer.label.trim();
-        const isEmpty = !qtyText && !priceText && !label;
+        const label2 = offer.label2.trim();
+        const isEmpty = !qtyText && !priceText && !label && !label2;
 
         if (isEmpty) {
           continue;
@@ -378,6 +385,7 @@ const Page = () => {
           qty: Math.trunc(qtyNumber),
           price: priceNumber,
           label,
+          label2,
         });
       }
 
@@ -960,7 +968,7 @@ const Page = () => {
                     {qtyOffers.map((offer, index) => (
                       <div
                         key={`qty-offer-${index}`}
-                        className="grid gap-2 rounded-md border border-[#C0D6DF]/50 bg-white p-2 md:grid-cols-[1fr_1fr_2fr_auto]"
+                        className="grid gap-2 rounded-md border border-[#C0D6DF]/50 bg-white p-2 md:grid-cols-[1fr_1fr_1.5fr_1.5fr_auto]"
                       >
                         <input
                           type="number"
@@ -998,6 +1006,19 @@ const Page = () => {
                             )
                           }
                           placeholder="Label (e.g. Best Seller)"
+                          className="rounded-md border border-[#C0D6DF]/70 bg-white px-3 py-2 text-sm text-[#1F3B4D] outline-none ring-[#4F6D7A]/30 placeholder:text-[#4F6D7A] focus:ring-2"
+                        />
+                        <input
+                          type="text"
+                          value={offer.label2}
+                          onChange={(event) =>
+                            updateQtyOfferRow(
+                              index,
+                              "label2",
+                              event.target.value,
+                            )
+                          }
+                          placeholder="Label 2 Name"
                           className="rounded-md border border-[#C0D6DF]/70 bg-white px-3 py-2 text-sm text-[#1F3B4D] outline-none ring-[#4F6D7A]/30 placeholder:text-[#4F6D7A] focus:ring-2"
                         />
                         <button

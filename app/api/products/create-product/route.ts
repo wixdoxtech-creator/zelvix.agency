@@ -82,7 +82,12 @@ function parseQtyOffers(value: unknown) {
   if (value === undefined) {
     return {
       hasValue: false,
-      data: [] as Array<{ qty: number; price: number; label: string }>,
+      data: [] as Array<{
+        qty: number;
+        price: number;
+        label: string;
+        label2: string;
+      }>,
     };
   }
 
@@ -92,7 +97,12 @@ function parseQtyOffers(value: unknown) {
     if (!text) {
       return {
         hasValue: true,
-        data: [] as Array<{ qty: number; price: number; label: string }>,
+        data: [] as Array<{
+          qty: number;
+          price: number;
+          label: string;
+          label2: string;
+        }>,
       };
     }
 
@@ -116,6 +126,7 @@ function parseQtyOffers(value: unknown) {
     const qty = Number(raw.qty);
     const price = Number(raw.price);
     const label = normalizeText(raw.label);
+    const label2 = normalizeText(raw.label2);
 
     if (!Number.isFinite(qty) || qty <= 0) {
       return null;
@@ -133,6 +144,7 @@ function parseQtyOffers(value: unknown) {
       qty: Math.trunc(qty),
       price,
       label,
+      label2,
     };
   });
 
@@ -145,7 +157,12 @@ function parseQtyOffers(value: unknown) {
 
   return {
     hasValue: true,
-    data: normalized as Array<{ qty: number; price: number; label: string }>,
+    data: normalized as Array<{
+      qty: number;
+      price: number;
+      label: string;
+      label2: string;
+    }>,
   };
 }
 

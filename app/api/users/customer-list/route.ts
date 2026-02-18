@@ -1,4 +1,5 @@
 import User from "@/model/user";
+import { Op } from "sequelize";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -17,13 +18,24 @@ export async function GET(request: Request) {
     const offset = (page - 1) * limit;
 
     const whereClause: Record<string, unknown> = { role: "user" };
-    if (statusParam === "block" || statusParam === "not_block") {
-      whereClause.status = statusParam;
+    if (statusParam === "block") {
+      whereClause[Op.or] = [{ status: "block" }, { is_block: true }];
+    } else if (statusParam === "not_block") {
+      whereClause[Op.and] = [{ status: "not_block" }, { is_block: false }];
     }
 
     const { count, rows } = await User.findAndCountAll({
       where: whereClause,
-      attributes: ["id", "email", "role", "status", "createdAt", "updatedAt"],
+      attributes: [
+        "id",
+        "email",
+        "role",
+        "status",
+        "is_block",
+        "is_verified",
+        "createdAt",
+        "updatedAt",
+      ],
       order: [["createdAt", "DESC"]],
       limit,
       offset,
@@ -106,6 +118,7 @@ export async function PATCH(request: Request) {
 
     if (status) {
       user.set("status", status);
+      user.set("is_block", status === "block");
     }
 
     await user.save();
@@ -118,6 +131,7 @@ export async function PATCH(request: Request) {
           email: user.get("email"),
           role: user.get("role"),
           status: user.get("status"),
+          is_block: user.get("is_block"),
         },
       },
       { status: 200 },

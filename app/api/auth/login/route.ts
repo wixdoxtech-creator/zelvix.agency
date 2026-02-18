@@ -19,7 +19,10 @@ export async function POST(request: Request) {
 
     const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (!isEmailValid) {
-      return NextResponse.json({ message: "Invalid email format" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid email format" },
+        { status: 400 },
+      );
     }
 
     const user = await User.findOne({
@@ -47,6 +50,7 @@ export async function POST(request: Request) {
 
     const role = String(user.get("role") ?? "user");
     const status = String(user.get("status") ?? "not_block");
+    const id = String(user.get("id") ?? null);
 
     if (status === "block") {
       return NextResponse.json(
@@ -56,7 +60,7 @@ export async function POST(request: Request) {
     }
 
     const response = NextResponse.json(
-      { message: "Login successful", role },
+      { message: "Login successful", id, role },
       { status: 200 },
     );
 

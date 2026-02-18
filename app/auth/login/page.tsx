@@ -22,8 +22,8 @@ const Page = () => {
       const response = await api.post("/api/auth/login", { email, password });
       setMessage(response.data?.message ?? "Login successful");
 
-      console.log("this si the data", response.data);
       localStorage.setItem("role", response.data?.role);
+      localStorage.setItem("user-id", response.data?.id);
 
       router.push(response.data?.role === "admin" ? "/admin/dashboard" : "/");
       // router.refresh();
